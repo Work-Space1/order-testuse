@@ -27,7 +27,7 @@ def sign_up():
     return redirect("/success=註冊成功")
 
 
-app.config["JWT_SECRET_KEY"] = "my_screct_key"
+app.config["JWT_SECRET_KEY"] = "my_screct_key"  #待驗證
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 @app.route("/login", methods=["POST"])
