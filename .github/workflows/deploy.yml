@@ -18,49 +18,34 @@ jobs:
         with:
           python-version: 3.9  # PythonAnywhere 支援的版本
 
-      - name: Install dependencies locally
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install -r requirements.txt
-
-      - name: Package project
-        run: |
-          tar -czf project.tar.gz ./
-
+        
+      # 呼叫 PythonAnywhere 控制台來執行 git pull 命令
       - name: Upload project to PythonAnywhere
         env:
-          USERNAME: ${{ secrets.USERNAME }} #PythonAnywhere 使用者名稱
-          TOKEN: ${{ secrets.TOKEN }} #PythonAnywhere API Token。
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }} #專案部署的絕對路徑，如 /home/yourusername/order-system_backend。
+          USERNAME: ${{ secrets.USERNAME }}  # PythonAnywhere 使用者名稱
+          TOKEN: ${{ secrets.TOKEN }}  # PythonAnywhere API token
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}  # 專案的絕對路徑，如 /order-testuse
         run: |
-          curl -X POST -H "Authorization: Token $TOKEN" \
-          -F "file=@project.tar.gz" \
-          "https://www.pythonanywhere.com/api/v0/user/$USERNAME/files/path$DEPLOY_PATH/project.tar.gz"
+          curl -X POST -H "Authorization: Token $TOKEN" \ 
+          -d "command=cd $DEPLOY_PATH && git pull origin main" \
+          "https://www.pythonanywhere.com/api/v0/user/$USERNAME/consoles/37251601/"
 
-      - name: Extract project and install dependencies using pip3 on PythonAnywhere
+      # 在虛擬環境中安裝依賴
+      - name: Install dependencies on PythonAnywhere
         env:
           USERNAME: ${{ secrets.USERNAME }}
           TOKEN: ${{ secrets.TOKEN }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           curl -X POST -H "Authorization: Token $TOKEN" \
-          -d "command=cd $DEPLOY_PATH && tar -xzf project.tar.gz && rm project.tar.gz && pip3 install --upgrade pip && pip3 install -r requirements.txt" \
-          "https://www.pythonanywhere.com/api/v0/user/$USERNAME/consoles/"
+          -d "command=cd $DEPLOY_PATH && source flask-venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt" \
+          "https://www.pythonanywhere.com/api/v0/user/$USERNAME/consoles/37251601/"
 
+      # 重啟 Web 應用以使更改生效
       - name: Reload PythonAnywhere Web App
         env:
           USERNAME: ${{ secrets.USERNAME }}
           TOKEN: ${{ secrets.TOKEN }}
         run: |
           curl -X POST -H "Authorization: Token $TOKEN" \
-          "https://www.pythonanywhere.com/api/v0/user/$USERNAME/webapps/WorkSpace01/reload/"
-
-
-      - name: Reload PythonAnywhere Web App
-        env:
-          USERNAME: ${{ secrets.PYTHONANYWHERE_USERNAME }}
-          API_TOKEN: ${{ secrets.PYTHONANYWHERE_API_TOKEN }}
-        run: |
-          # 重新加載 Web 應用
-          curl -X POST -H "Authorization: Token $API_TOKEN" \
           "https://www.pythonanywhere.com/api/v0/user/$USERNAME/webapps/WorkSpace01/reload/"
