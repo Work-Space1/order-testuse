@@ -28,7 +28,7 @@ jobs:
         run: |
           curl -X POST -H "Authorization: Token $TOKEN" \ 
           -d "command=cd $DEPLOY_PATH && git pull origin main" \
-          "https://www.pythonanywhere.com/api/v0/user/$USERNAME/consoles/37251601/"
+          "https://www.pythonanywhere.com/api/v0/user/$USERNAME/consoles/"
 
       # 在虛擬環境中安裝依賴
       - name: Install dependencies on PythonAnywhere
@@ -39,7 +39,7 @@ jobs:
         run: |
           curl -X POST -H "Authorization: Token $TOKEN" \
           -d "command=cd $DEPLOY_PATH && source flask-venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt" \
-          "https://www.pythonanywhere.com/api/v0/user/$USERNAME/consoles/37251601/"
+          "https://www.pythonanywhere.com/api/v0/user/$USERNAME/consoles/"
 
       # 重啟 Web 應用以使更改生效
       - name: Reload PythonAnywhere Web App
