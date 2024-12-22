@@ -14,9 +14,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: 通知 PythonAnywhere 更新代碼並重啟
-      - name: Deploy to PythonAnywhere
+
+      # Step 2: 發送 Webhook 請求
+      - name: Notify PythonAnywhere via Webhook
         run: |
           curl -X POST \
-          -H "Authorization: Token ${{ secrets.TOKEN }}" \
-          https://www.pythonanywhere.com/api/v0/user/WorkSpace01/webapps/WorkSpace01.pythonanywhere.com/reload/
+          -H "X-Webhook-Secret: ${{ secrets.TOKEN }}" \
+          https://WorkSpace01.pythonanywhere.com/webhook          

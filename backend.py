@@ -9,6 +9,8 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 
 app = Flask(__name__)
 
+WEBHOOK_SECRET = "123"
+
 @app.route("/sign_up", methods=["POST"])
 def sign_up():
     email=request.form.get["email"]   #目前考慮email or LINE 連動登入
@@ -96,7 +98,30 @@ def create_stripe_pay():
     except Exception as e:
         return jsonify(error=str(e)),403   # 如果創建支付時發生錯誤，返回錯誤訊息
 
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    # Verify the secret key
+    secret = request.headers.get("X-Webhook-Secret")
+    if secret != WEBHOOK_SECRET:
+        return jsonify({"error": "Unauthorized"}), 403
 
+    # Pull the latest code from GitHub
+    try:
+        project_dir = "/home/WorkSpace01/order-testuse"  # 替換為您的專案目錄
+        requirements_file = os.path.join(project_dir, "requirements.txt")
+
+        # Step 1: Pull the latest code
+        subprocess.run(["git", "-C", project_dir, "pull"], check=True)
+
+        # Step 2: Install dependencies
+        subprocess.run(["pip3", "install", "-r", requirements_file], check=True)
+
+        # Step 3: Reload the application
+        subprocess.run(["pythonanywhere-webapp", "reload", "WorkSpace01.pythonanywhere.com"], check=True)
+
+        return jsonify({"message": "Update successful!"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
