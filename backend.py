@@ -78,7 +78,7 @@ def signOut():
 
 @app.route("/")
 def find():
-    return redirect("/123456789")
+    return redirect("/1234567890")
 
 stripe.api_key = "sk_test_51QBrlCByxTEIQfBXCEuz9gYnoZD53sOZR80clSPblmSW3MbtmEsM5C7AvFK4nEPyuKpRFiwCFXwhlQEwnvwwVlpV00dLCqWczC"
 @app.route("/create_stripe_pay")
